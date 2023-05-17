@@ -61,7 +61,7 @@ module "blog_alb" {
 
   target_groups = [
     {
-      name_prefix      = "${var.env.name}-blog-"
+      name_prefix      = "${var.env.name}-"
       backend_protocol = "HTTP"
       backend_port     = 80
       target_type      = "instance"
