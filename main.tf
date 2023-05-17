@@ -32,18 +32,7 @@ module "blog_vpc" {
   }
 }
 
-resource "aws_instance" "blog" {
-  ami           = data.aws_ami.app_ami.id
-  instance_type = var.instance_type
-
-  vpc_security_group_ids = [module.blog_sg.security_group_id]
-
-  tags = {
-    Name = "HelloWorld"
-  }
-}
-
-module "alb" {
+module "blog_alb" {
   source  = "terraform-aws-modules/alb/aws"
   version = "~> 8.0"
 
@@ -61,12 +50,6 @@ module "alb" {
       backend_protocol = "HTTP"
       backend_port     = 80
       target_type      = "instance"
-      targets = {
-        my_target = {
-          target_id = aws_instance.blog.id
-          port = 80
-        }
-      }
     }
   ]
 
@@ -87,12 +70,10 @@ module "blog_sg" {
   source  = "terraform-aws-modules/security-group/aws"
   version = "4.17.2"
 
-  name    = "blog_new"
-  vpc_id  = module.blog_vpc.public_subnets[0]
-
-  ingress_rules       = ["http-80-tcp", "https-443-tcp"]
+  vpc_id  = module.blog_vpc.vpc_id
+  name    = "blog"
+  ingress_rules = ["https-443-tcp","http-80-tcp"]
   ingress_cidr_blocks = ["0.0.0.0/0"]
-
-  egress_rules       = ["all-all"]
+  egress_rules = ["all-all"]
   egress_cidr_blocks = ["0.0.0.0/0"]
 }
